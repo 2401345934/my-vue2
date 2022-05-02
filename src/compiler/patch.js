@@ -71,27 +71,30 @@ function createElm (vnode, parent, referNode) {
 
 
 /**
- * @description:  组件创建
- * @param {*}
- * @return {*}
- * @author: alan
+ * 创建自定义组件
+ * @param {*} vnode
  */
 function createComponent (vnode) {
-  const { tag } = vnode
-  // 判断标签是否是平台保留标签
-  if (tag && !isReserveTag(tag)) {
-    const { context: { $options: { components } } } = vnode
-    const compOptions = components[tag]
-    const vueComponent = new Vue(compOptions)
-    // 执行自组件 挂载
-    vueComponent.$mount()
-    // 记录自组件父节点
-    // vueComponent._vnode.parent = vnode.parent
-    // 子组件 添加到 付组件内
-    vnode.parent.appendChild(vueComponent._vnode.elm)
+  if (vnode.tag && !isReserveTag(vnode.tag)) { // 非保留节点，则说明是组件
+    // 获取组件配置信息
+    const { tag, context: { $options: { components } } } = vnode
+    if (components) {
+      const compOptions = components[tag]
+      const compIns = new Vue(compOptions)
+      // 将父组件的 VNode 放到子组件的实例上
+      compIns._parentVnode = vnode
+      // 挂载子组件
+      compIns.$mount()
+      // 记录子组件 vnode 的父节点信息
+      compIns._vnode.parent = vnode.parent
+      // 将子组件添加到父节点内
+      vnode.parent.appendChild(compIns._vnode.elm)
+      return true
+    }
   }
-
 }
+
+
 /**
  * @description: 给节点设置属性
  * @param {*} attr

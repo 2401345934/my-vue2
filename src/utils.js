@@ -11,14 +11,10 @@ export function isUnaryTag (tagName) {
 
 
 
-
 /**
- * @description: 判断组件标签是不是平台保留标签
- * @param {*} tagName
- * @return {*}
- * @author: alan
+ * 是否为平台保留节点
  */
 export function isReserveTag (tagName) {
-  return ["div", "p", "img", "video", "h1", "h2", "h3", "h4", "h5", "h6", "br", "a", "input", "select", 'button', 'template', 'span', 'option'].includes(tagName)
+  const reserveTag = ['div', 'h3', 'span', 'input', 'select', 'option', 'p', 'button', 'template']
+  return reserveTag.includes(tagName)
 }
-

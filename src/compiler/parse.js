@@ -107,17 +107,35 @@ export default function parse (template) {
       // 处理v-on 指令
       processVOn(currentElement, RegExp.$1, rawAttr[`v-on:${RegExp.$1}`])
     }
+    processSlotContent(currentElement)
     // 属性处理完成 让其和父节点产生关系
     if (stack.length) {
       stack.at(-1).children.push(currentElement)
       currentElement.parent = stack.at(-1)
+      if (currentElement.slotName) {
+        // 插槽处理  说明该节点是组件传递给插槽的内容
+        const { parent, slotName, scopeSlot, children } = currentElement
+        const slotInfo = {
+          slotName,
+          scopeSlot,
+          children: children.map(item => {
+            // 避免 json stringify 爆栈 如果存在循环引用 stringify 会爆栈
+            delete item.parent
+            return item
+          })
+        }
+        if (parent.rawAttr.scopedSlots) {
+          parent.rawAttr.scopedSlots[slotName] = slotInfo
+        } else {
+          parent.rawAttr.scopedSlots = { [slotName]: slotInfo }
+        }
+      }
     }
 
   }
 
   // 处理 v-model 指令 将结果放到 current.attr
   function processVModel (current) {
-
     const { attr, tag, rawAttr } = current
     const { type, 'v-model': vModelValue } = rawAttr
     if (tag === 'input') {
@@ -132,6 +150,7 @@ export default function parse (template) {
       attr.vModel = { tag, value: vModelValue }
     }
   }
+
   // 处理 v-bind 指令 将结果放到 current.attr
   function processVBind (current, key, value) {
     const attr = current.attr
@@ -139,6 +158,7 @@ export default function parse (template) {
       [key]: value
     }
   }
+
   // 处理 v-on 指令 将结果放到 current.attr
   function processVOn (current, key, value) {
     const attr = current.attr
@@ -146,7 +166,6 @@ export default function parse (template) {
       [key]: value
     }
   }
-
 
   // 处理文本
   function processChars (text) {
@@ -188,5 +207,25 @@ export default function parse (template) {
 
     return attrMap
 
+  }
+}
+
+/**
+ * @description: 处理插槽
+ * @param {*} el
+ * @return {*}
+ * @author: alan
+ */
+function processSlotContent (el) {
+  if (el.tag === 'template') {
+    const attrMap = el.rawAttr
+    for (let k in attrMap) {
+      if (k.match(/v-slot:(.*)/)) {
+        // 说明有slot 标签
+        const slotName = el.slotName = RegExp.$1
+        el.scopeSlot = attrMap[`v-slot:${slotName}`]
+        return
+      }
+    }
   }
 }

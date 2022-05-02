@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <div class="parent">
+    <div class="child-1">
+      <div class="child-1-1">
+        <div class="child-1-1-1">
+          a
+        </div>
+      </div>
+      <div class="child-1-2">
+        <div class="child-1-2-1">
+          b
+        </div>
+      </div>
+      <div class="child-1-3">
+        c
+      </div>
+    </div>
+
+    <div class="child-2">
+      <div class="child-2-1">
+        d
+      </div>
+      <div class="child-2-2">
+        e
+      </div>
+    </div>
+    <div class="child-3">
+      <div class="child-3-1">
+        f
+      </div>
+    </div>
+
+  </div>
+
+</body>
+<script>
+  const el = document.querySelector('.parent')
+
+
+
+  // 深度优先
+  let deepTraversal1 = (node) => {
+    let nodes = []
+    // 栈
+    let stack = []
+    if (node) {
+      // 栈中 push 一个跟节点
+      stack.push(node)
+      // 如果栈有值
+      while (stack.length) {
+        // 拿到栈的最后一个值
+        let item = stack.pop()
+        // 最后一个值的子节点
+        let children = item.children
+        // push 到 nodes
+        nodes.push(item)
+        // 先进后出
+        // 倒叙遍历 注意：：：：  因为是要深度优先 就先把有所当前的倒叙进入
+        // 第一个 parent
+        // 第二个 child-1
+        //  nodes = [parent] chilren = [child3,child2,child1]
+        //  nodes = [parent,child1] chilren = [child3,child2]
+        //  nodes = [parent,child1] chilren = [child3,child2,child1-1,child1-1-1,...]
+        for (let i = children.length - 1; i >= 0; i--) {
+          // 把每一项添加到数据里面 最后 然后在通过 pop 拿到
+          stack.push(children[i])
+        }
+      }
+    }
+    return nodes
+  }
+  console.log(deepTraversal1(el));
+
+
+  // 广度优先
+  let widthTraversal2 = (node) => {
+    let nodes = []
+    let stack = []
+    if (node) {
+      stack.push(node)
+      while (stack.length) {
+        let item = stack.shift()
+        let children = item.children
+        nodes.push(item)
+        // 队列，先进先出
+        // nodes = [] stack = [parent]
+        // nodes = [parent] stack = [child1,child2,child3]
+        // nodes = [parent, child1] stack = [child2,child3,child1-1,child1-2]
+        // nodes = [parent,child1,child2]
+        for (let i = 0; i < children.length; i++) {
+          stack.push(children[i])
+        }
+      }
+    }
+    return nodes
+  }
+
+  console.log(widthTraversal2(el));
+
+
+</script>
+
+</html>

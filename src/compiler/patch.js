@@ -26,6 +26,7 @@ export default function patch (oldVnode, vnode) {
       parent.removeChild(oldVnode)
     } else {
       console.log('update')
+      patchVnode()
     }
   }
   return vnode.elm
@@ -200,3 +201,121 @@ function createTextNode (textVNode) {
   return textNode
 }
 
+
+
+
+/**
+ * @description: 对比新节点
+ * @param {*} oldVnode
+ * @param {*} vnode
+ * @return {*}
+ * @author: alan
+ */
+function patchVnode (oldVnode, vnode) {
+  if (oldVnode === vnode) return
+
+  vnode.elm = oldVnode.elm
+
+  const ch = vnode.children
+  const oldCh = oldVnode.children
+
+  if (!vnode.text) {
+    // 不存在文本节点
+    if (ch && oldCh) {
+      // 新老节点都有子节点 证明是更新
+      updateChildren(ch, oldCh)
+    } else if (ch) {
+      // 老的节点没有  新的有 走新增
+
+    }
+    else if (oldCh) {
+      // 老的节点有  新的没有  走删除
+
+    }
+  } else {
+    // 存在 文本节点
+    if (vnode.expression) {
+      // 存在表达式
+      const value = JSON.stringify(vnode.context[vnode.text.expression])
+      try {
+        const oldValue = oldVnode.elm.textContent
+        if (value !== oldValue) {
+          // 新老值 不一样
+          oldVnode.elm.textContent = value
+        }
+      } catch (e) {
+
+      }
+    }
+  }
+
+}
+
+/**
+ * @description:对比孩子节点
+ * @param {*} ch
+ * @param {*} oldCh
+ * @return {*}
+ * @author: alan
+ */
+function updateChildren (ch, oldCh) {
+  // 新开始 新结束 老开始 老结束
+  let newStartIdx = 0, newEndIdx = ch.length - 1, oldStartIdx = 0, oldEndIdx = oldCh.length - 1;
+
+  // 便利
+  while (newStartIdx <= newEndIdx || oldStartIdx <= oldEndIdx) {
+    // 新开始节点
+    const newStartNode = ch[newStartIdx]
+    // 新结束节点
+    const newEndNode = ch[newEndIdx]
+    // 老开始节点
+    const oldStartNode = ch[oldStartIdx]
+    // 老结束节点
+    const oldEndNode = ch[oldEndIdx]
+
+    // 四种假设
+    if (sameVnode(newStartNode, oldStartNode)) {
+      // 新开始 和老开始是一样的
+      // 对比两个节点 找不出不同的地方 更新
+      patchVnode(oldStartNode, newStartNode)
+      // 游标增加
+      oldStartIdx++
+      newStartIdx++
+    } else if (sameVnode(newStartNode, oldEndNode)) {
+      // 新开始 老结束
+      patchVnode(oldEndNode, newStartNode)
+      // 老节点移动  找到老节点的父节点 把老节点 插入进去
+      oldEndNode.elm.parentNode.insertBefore(oldEndNode.elm, oldCh[newStartIdx].elm)
+      oldEndIdx--
+      newStartIdx++
+    } else if (sameVnode(newEndNode, oldStartNode)) {
+      // 新结束 老开始
+      // 找到老节点的父节点 执行插入  把老节点自己 插入到下一个位置
+      patchVnode(oldStartNode, newEndNode)
+      oldStartNode.elm.parentNode.insertBefore(oldStartNode.elm, oldCh[newEndIdx].elm.nextSibling)
+      oldStartIdx++
+      newEndIdx--
+    } else if (sameVnode(newEndNode, oldEndNode)) {
+      // 新结束 老结束
+      patchVnode(oldEndNode, newEndNode)
+      // 游标增加
+      oldEndIdx--
+      newEndIdx--
+    } else {
+      // 没有命中假设 diff
+      //  
+    }
+
+  }
+}
+
+/**
+ * @description: 判断两个节点是不是同一个
+ * @param {*} a
+ * @param {*} b
+ * @return {*}
+ * @author: alan
+ */
+function sameVnode (a, b) {
+  return a.key === b.key && a.tag === b.tag
+}

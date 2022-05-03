@@ -1,39 +1,33 @@
-# 本项目 主要实现 vue1 核心原理
+# 基于模版解析的编译器
 
-## 按照服务 方便本地启动一个服务
+# 解析模版得到 AST
 
-## npm i serve -g
+# 基于 AST 生成渲染函数
 
-# vue1 响应式介绍
+# render helper
 
-## Vue1.x 中响应式数据对象的所有属性（key）和 dep 是一一对应对应关系，一个 key 对应一个 dep；响应式数据在页面中每引用一次就会产生一个 watcher，所以在 Vue1.0 中 dep 和 watcher 是一对多的关系
+## _c，创建指定标签的 VNode
 
-# 目标
+## _v，创建文本节点的 VNode
 
-## [x]数据响应式拦截
+## _t，创建插槽节点的 VNode
 
-### [x] 原始值
+# VNode
 
-### [x] 普通对象
+# patch
 
-### [x]数组
+# 原生标签和组件的初始渲染
 
-## [x]数据响应式更新
+## v-model
 
-### [x] 依赖收集，Dep
+## v-bind
 
-### [x] 依赖通知 Watcher 更新
+## v-on
 
-### [x] 编译器，compiler
+# diff
 
-### [x]methods + 事件 + 数据响应式更新
+# 插槽原理
 
-### [x]v-bind 指令
+# computed
 
-### [x]v-model 双向绑定
-
-#### [x]input 输入框
-
-#### [x]   checkbox
-
-#### [x]   select
+# 异步更新队列

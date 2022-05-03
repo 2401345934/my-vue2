@@ -24,6 +24,9 @@ export default function Dep () {
 // 在实例化 Watcher 时进行赋值，待依赖收集完成后在 Watcher 中又重新赋值为 null
 Dep.target = null
 
+// 存放tag 实例 避免 compupted 释放 tagget 导致后面的 dep 收集依赖的时候 taget 是null
+const targetStack = []
+
 /**
  * 收集 watcher
  * 在发生读取操作时（vm.xx) && 并且 Dep.target 不为 null 时进行依赖收集
@@ -44,3 +47,16 @@ Dep.prototype.notify = function () {
   }
 }
 
+
+
+export function pushTarget (target) {
+  targetStack.push(target)
+  Dep.target = target
+
+}
+
+export function popTarget () {
+  targetStack.pop()
+  Dep.target = targetStack[targetStack.length - 1]
+
+}

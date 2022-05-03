@@ -1,17 +1,27 @@
-import Dep from "./dep.js"
+import { popTarget, pushTarget } from "./dep.js"
 
 /**
  * @param {*} cb 回调函数，负责更新 DOM 的回调函数
  */
-export default function Watcher (cb) {
+export default function Watcher (cb, options = {}, vm = null) {
   // 备份 cb 函数
   this._cb = cb
+  this.options = options
+  !options.lazy && this.get()
+  this.vm = vm
+  // 计算属性实现 缓存
+  this.dirty = true
+  // 纪录 cb 执行结果
+  this.value = null
+}
+
+Watcher.prototype.get = function () {
   // 赋值 Dep.target
-  Dep.target = this
+  pushTarget(this)
   // 执行 cb 函数，cb 函数中会发生 vm.xx 的属性读取，进行依赖收集
-  cb()
+  this.value = this._cb.apply(this.vm)
   // 依赖收集完成，Dep.target 重新赋值为 null，防止重复收集
-  Dep.target = null
+  popTarget()
 }
 
 /**
@@ -19,6 +29,15 @@ export default function Watcher (cb) {
  * 让 update 方法执行 this._cb 函数更新 DOM
  */
 Watcher.prototype.update = function () {
-  this._cb()
+  Promise.resolve().then(() => {
+    this._cb()
+  })
+  this.dirty = true
+}
+
+Watcher.prototype.evalute = function () {
+  // 触发计算
+  this.get()
+  this.dirty = false
 }
 

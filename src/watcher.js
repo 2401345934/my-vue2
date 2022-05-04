@@ -1,9 +1,13 @@
+import queueWacher from "./asyncUpdateQueue.js"
 import { popTarget, pushTarget } from "./dep.js"
 
+// wacher顺序
+let uid = 0
 /**
  * @param {*} cb 回调函数，负责更新 DOM 的回调函数
  */
 export default function Watcher (cb, options = {}, vm = null) {
+  this.uid = uid++
   // 备份 cb 函数
   this._cb = cb
   this.options = options
@@ -29,10 +33,11 @@ Watcher.prototype.get = function () {
  * 让 update 方法执行 this._cb 函数更新 DOM
  */
 Watcher.prototype.update = function () {
-  Promise.resolve().then(() => {
-    this._cb()
-  })
-  this.dirty = true
+  if (this.options.lazy) {
+    this.dirty = true
+  } else {
+    queueWacher(this)
+  }
 }
 
 Watcher.prototype.evalute = function () {
@@ -41,3 +46,8 @@ Watcher.prototype.evalute = function () {
   this.dirty = false
 }
 
+
+
+Watcher.prototype.run = function () {
+  this.get()
+}

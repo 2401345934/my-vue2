@@ -1,5 +1,5 @@
 {
-  "name": "vue2",
+  "name": "@xiaomh/vue2",
   "version": "1.0.0",
   "description": "## 按照服务 方便本地启动一个服务",
   "main": "index.js",
